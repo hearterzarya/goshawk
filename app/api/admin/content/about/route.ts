@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { isSessionValid, type AdminSession } from '@/lib/auth'
-import { writeFile, readFile } from 'fs/promises'
+import { writeFile, readFile, mkdir } from 'fs/promises'
 import { join } from 'path'
 
 const CONTENT_FILE = join(process.cwd(), 'data', 'about-content.json')
@@ -66,12 +66,26 @@ export async function PUT(request: Request) {
     }
 
     const content = await request.json()
+    
+    // Ensure data directory exists
+    const dataDir = join(process.cwd(), 'data')
+    try {
+      await mkdir(dataDir, { recursive: true })
+    } catch (error) {
+      // Directory might already exist, ignore error
+    }
+    
     await saveContent(content)
 
     return NextResponse.json({ success: true, content })
-  } catch (error) {
+  } catch (error: any) {
+    console.error('Save content error:', error)
     return NextResponse.json(
-      { error: 'Failed to save content' },
+      { 
+        error: 'Failed to save content',
+        details: error?.message || 'Unknown error',
+        stack: process.env.NODE_ENV === 'development' ? error?.stack : undefined
+      },
       { status: 500 }
     )
   }

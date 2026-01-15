@@ -145,10 +145,11 @@ export default function EditAboutContentPage() {
       if (response.ok) {
         alert('Content saved successfully!')
       } else {
-        alert('Failed to save content')
+        const data = await response.json()
+        alert(`Failed to save content: ${data.error || 'Unknown error'}${data.details ? `\n\nDetails: ${data.details}` : ''}`)
       }
-    } catch (error) {
-      alert('Error saving content')
+    } catch (error: any) {
+      alert(`Error saving content: ${error?.message || 'Network error'}`)
     } finally {
       setSaving(false)
     }
