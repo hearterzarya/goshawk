@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server'
-import { unlink } from 'fs/promises'
-import { join } from 'path'
+import { del } from '@vercel/blob'
 import { cookies } from 'next/headers'
 import { isSessionValid, type AdminSession } from '@/lib/auth'
+
+export const dynamic = 'force-dynamic'
 
 export async function DELETE(request: Request) {
   try {
@@ -26,20 +27,19 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: 'URL required' }, { status: 400 })
     }
 
-    // Extract filename from URL
-    const filename = url.replace('/uploads/', '')
-    const filepath = join(process.cwd(), 'public', 'uploads', filename)
-
     try {
-      await unlink(filepath)
+      // Delete from Vercel Blob using the URL
+      await del(url)
       return NextResponse.json({ success: true })
     } catch (error) {
+      console.error('Delete error:', error)
       return NextResponse.json(
         { error: 'File not found or already deleted' },
         { status: 404 }
       )
     }
   } catch (error) {
+    console.error('Delete image error:', error)
     return NextResponse.json(
       { error: 'Failed to delete image' },
       { status: 500 }

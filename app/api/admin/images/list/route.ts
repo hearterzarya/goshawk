@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server'
-import { readdir } from 'fs/promises'
-import { join } from 'path'
+import { list } from '@vercel/blob'
 import { cookies } from 'next/headers'
 import { isSessionValid, type AdminSession } from '@/lib/auth'
+
+export const dynamic = 'force-dynamic'
 
 export async function GET() {
   try {
@@ -19,20 +20,22 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const uploadsDir = join(process.cwd(), 'public', 'uploads')
-    
-    try {
-      const files = await readdir(uploadsDir)
-      const images = files
-        .filter(file => /\.(jpg|jpeg|png|gif|webp)$/i.test(file))
-        .map(file => `/uploads/${file}`)
-      
-      return NextResponse.json({ images })
-    } catch (error) {
-      // Directory doesn't exist or is empty
-      return NextResponse.json({ images: [] })
-    }
+    // List all blobs in the uploads folder
+    const { blobs } = await list({
+      prefix: 'uploads/',
+    })
+
+    // Filter for images only and extract URLs
+    const images = blobs
+      .filter(blob => {
+        const extension = blob.pathname.split('.').pop()?.toLowerCase()
+        return ['jpg', 'jpeg', 'png', 'gif', 'webp', 'avif'].includes(extension || '')
+      })
+      .map(blob => blob.url)
+
+    return NextResponse.json({ images })
   } catch (error) {
+    console.error('List images error:', error)
     return NextResponse.json(
       { error: 'Failed to list images' },
       { status: 500 }

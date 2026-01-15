@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server'
-import { writeFile, mkdir } from 'fs/promises'
-import { join } from 'path'
+import { put } from '@vercel/blob'
 import { cookies } from 'next/headers'
 import { isSessionValid, type AdminSession } from '@/lib/auth'
+
+export const dynamic = 'force-dynamic'
 
 export async function POST(request: Request) {
   try {
@@ -42,33 +43,44 @@ export async function POST(request: Request) {
       )
     }
 
-    const bytes = await file.arrayBuffer()
-    const buffer = Buffer.from(bytes)
-
-    // Create uploads directory if it doesn't exist
-    const uploadsDir = join(process.cwd(), 'public', 'uploads')
-    try {
-      await mkdir(uploadsDir, { recursive: true })
-    } catch (error) {
-      // Directory might already exist
-    }
-
     // Generate unique filename
     const timestamp = Date.now()
     const originalName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_')
-    const filename = `${timestamp}-${originalName}`
-    const filepath = join(uploadsDir, filename)
+    const filename = `uploads/${timestamp}-${originalName}`
 
-    // Write file
-    await writeFile(filepath, buffer)
+    // Check if BLOB_READ_WRITE_TOKEN is set
+    if (!process.env.BLOB_READ_WRITE_TOKEN) {
+      return NextResponse.json(
+        { 
+          error: 'BLOB_READ_WRITE_TOKEN is not set. Please add it to your .env.local file. See ENV_SETUP.md for instructions.' 
+        },
+        { status: 500 }
+      )
+    }
+
+    // Upload to Vercel Blob
+    const blob = await put(filename, file, {
+      access: 'public',
+      contentType: file.type,
+    })
 
     // Return URL
-    const url = `/uploads/${filename}`
-    return NextResponse.json({ url, filename })
-  } catch (error) {
+    return NextResponse.json({ url: blob.url, filename: filename })
+  } catch (error: any) {
     console.error('Upload error:', error)
+    
+    // Provide more specific error messages
+    if (error.message?.includes('token') || error.message?.includes('unauthorized')) {
+      return NextResponse.json(
+        { 
+          error: 'Invalid BLOB_READ_WRITE_TOKEN. Please check your .env.local file and ensure the token is correct.' 
+        },
+        { status: 500 }
+      )
+    }
+    
     return NextResponse.json(
-      { error: 'Upload failed' },
+      { error: error.message || 'Upload failed. Please check your BLOB_READ_WRITE_TOKEN in .env.local' },
       { status: 500 }
     )
   }
