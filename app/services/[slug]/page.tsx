@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { notFound, useParams } from 'next/navigation'
 import Image from 'next/image'
+import { SafeImage } from '@/components/ui/SafeImage'
 import { Section } from '@/components/ui/Section'
 import { Container } from '@/components/ui/Container'
 import { Card } from '@/components/ui/Card'
@@ -101,11 +102,16 @@ export default function ServicePage() {
             {/* Service Image or Icon */}
             {service.image ? (
               <div className="relative w-full h-96 mb-8 rounded-lg overflow-hidden shadow-xl">
-                <Image
+                <SafeImage
                   src={service.image}
                   alt={service.title}
                   fill
                   className="object-cover"
+                  fallback={
+                    <div className="flex items-center justify-center h-full text-8xl">
+                      {service.icon}
+                    </div>
+                  }
                 />
               </div>
             ) : (
