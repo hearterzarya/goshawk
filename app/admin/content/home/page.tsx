@@ -131,14 +131,18 @@ export default function EditHomeContentPage() {
         body: JSON.stringify(formData),
       })
 
-      // Check if response has content before parsing JSON
-      const contentType = response.headers.get('content-type')
-      if (!contentType || !contentType.includes('application/json')) {
+      // Always try to parse JSON, handle errors gracefully
+      let data
+      try {
         const text = await response.text()
-        throw new Error(`Invalid response: ${text || 'Empty response'}`)
+        if (!text || text.trim() === '') {
+          throw new Error('Empty response from server')
+        }
+        data = JSON.parse(text)
+      } catch (parseError: any) {
+        console.error('Response parsing error:', parseError)
+        throw new Error(`Failed to parse server response: ${parseError.message}`)
       }
-
-      const data = await response.json()
 
       if (response.ok) {
         alert('Content saved successfully!')
@@ -147,11 +151,7 @@ export default function EditHomeContentPage() {
       }
     } catch (error: any) {
       console.error('Save error:', error)
-      if (error.message?.includes('JSON')) {
-        alert(`Error saving content: Invalid response from server. Please check the console for details.`)
-      } else {
-        alert(`Error saving content: ${error?.message || 'Network error'}`)
-      }
+      alert(`Error saving content: ${error?.message || 'Network error'}\n\nPlease check the browser console for more details.`)
     } finally {
       setSaving(false)
     }

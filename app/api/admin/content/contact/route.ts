@@ -48,27 +48,42 @@ export async function GET() {
   }
 }
 
+export const dynamic = 'force-dynamic'
+
 export async function PUT(request: Request) {
   try {
     const cookieStore = await cookies()
     const sessionCookie = cookieStore.get('admin_session')
     
     if (!sessionCookie) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: 'Unauthorized' }, { 
+        status: 401,
+        headers: { 'Content-Type': 'application/json' }
+      })
     }
 
     const session: AdminSession = JSON.parse(sessionCookie.value)
     if (!isSessionValid(session)) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: 'Unauthorized' }, { 
+        status: 401,
+        headers: { 'Content-Type': 'application/json' }
+      })
     }
 
     let content
     try {
-      content = await request.json()
+      const body = await request.text()
+      if (!body || body.trim() === '') {
+        return NextResponse.json(
+          { error: 'Request body is empty' },
+          { status: 400, headers: { 'Content-Type': 'application/json' } }
+        )
+      }
+      content = JSON.parse(body)
     } catch (error: any) {
       return NextResponse.json(
         { error: 'Invalid JSON in request body', details: error.message },
-        { status: 400 }
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
       )
     }
     
@@ -82,28 +97,26 @@ export async function PUT(request: Request) {
     
     await saveContent(content)
 
-    return NextResponse.json({ success: true, content }, { status: 200 })
+    return NextResponse.json(
+      { success: true, content }, 
+      { 
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      }
+    )
   } catch (error: any) {
     console.error('Save content error:', error)
     // Always return valid JSON, even on error
-    try {
-      return NextResponse.json(
-        { 
-          error: 'Failed to save content',
-          details: error?.message || 'Unknown error',
-          stack: process.env.NODE_ENV === 'development' ? error?.stack : undefined
-        },
-        { status: 500 }
-      )
-    } catch (jsonError) {
-      // Fallback if JSON.stringify fails
-      return new NextResponse(
-        JSON.stringify({ error: 'Failed to save content', details: 'Internal server error' }),
-        { 
-          status: 500,
-          headers: { 'Content-Type': 'application/json' }
-        }
-      )
-    }
+    return NextResponse.json(
+      { 
+        error: 'Failed to save content',
+        details: error?.message || 'Unknown error',
+        stack: process.env.NODE_ENV === 'development' ? error?.stack : undefined
+      },
+      { 
+        status: 500,
+        headers: { 'Content-Type': 'application/json' }
+      }
+    )
   }
 }
