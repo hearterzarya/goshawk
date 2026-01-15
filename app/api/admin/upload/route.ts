@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
-import { put } from '@vercel/blob'
 import { cookies } from 'next/headers'
 import { isSessionValid, type AdminSession } from '@/lib/auth'
+import { uploadImage } from '@/lib/imageStorage'
 
 export const dynamic = 'force-dynamic'
 
@@ -43,29 +43,10 @@ export async function POST(request: Request) {
       )
     }
 
-    // Generate unique filename
-    const timestamp = Date.now()
-    const originalName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_')
-    const filename = `uploads/${timestamp}-${originalName}`
+    // Upload using hybrid storage system
+    const result = await uploadImage(file)
 
-    // Check if BLOB_READ_WRITE_TOKEN is set
-    if (!process.env.BLOB_READ_WRITE_TOKEN) {
-      return NextResponse.json(
-        { 
-          error: 'BLOB_READ_WRITE_TOKEN is not set. Please add it to your .env.local file. See ENV_SETUP.md for instructions.' 
-        },
-        { status: 500 }
-      )
-    }
-
-    // Upload to Vercel Blob
-    const blob = await put(filename, file, {
-      access: 'public',
-      contentType: file.type,
-    })
-
-    // Return URL
-    return NextResponse.json({ url: blob.url, filename: filename })
+    return NextResponse.json({ url: result.url, filename: result.filename })
   } catch (error: any) {
     console.error('Upload error:', error)
     
@@ -73,14 +54,18 @@ export async function POST(request: Request) {
     if (error.message?.includes('token') || error.message?.includes('unauthorized')) {
       return NextResponse.json(
         { 
-          error: 'Invalid BLOB_READ_WRITE_TOKEN. Please check your .env.local file and ensure the token is correct.' 
+          error: 'Invalid BLOB_READ_WRITE_TOKEN. Using local storage instead. Check your .env.local file.',
+          details: error.message
         },
         { status: 500 }
       )
     }
     
     return NextResponse.json(
-      { error: error.message || 'Upload failed. Please check your BLOB_READ_WRITE_TOKEN in .env.local' },
+      { 
+        error: 'Upload failed',
+        details: error.message || 'Unknown error'
+      },
       { status: 500 }
     )
   }

@@ -27,7 +27,13 @@ async function getContent() {
 }
 
 async function saveContent(content: any) {
-  await writeFile(CONTENT_FILE, JSON.stringify(content, null, 2), 'utf-8')
+  try {
+    // Validate content is valid JSON-serializable
+    const jsonString = JSON.stringify(content, null, 2)
+    await writeFile(CONTENT_FILE, jsonString, 'utf-8')
+  } catch (error: any) {
+    throw new Error(`Failed to write file: ${error.message}`)
+  }
 }
 
 export async function GET() {
@@ -56,7 +62,15 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const content = await request.json()
+    let content
+    try {
+      content = await request.json()
+    } catch (error: any) {
+      return NextResponse.json(
+        { error: 'Invalid JSON in request body', details: error.message },
+        { status: 400 }
+      )
+    }
     
     // Ensure data directory exists
     const dataDir = join(process.cwd(), 'data')
@@ -68,16 +82,28 @@ export async function PUT(request: Request) {
     
     await saveContent(content)
 
-    return NextResponse.json({ success: true, content })
+    return NextResponse.json({ success: true, content }, { status: 200 })
   } catch (error: any) {
     console.error('Save content error:', error)
-    return NextResponse.json(
-      { 
-        error: 'Failed to save content',
-        details: error?.message || 'Unknown error',
-        stack: process.env.NODE_ENV === 'development' ? error?.stack : undefined
-      },
-      { status: 500 }
-    )
+    // Always return valid JSON, even on error
+    try {
+      return NextResponse.json(
+        { 
+          error: 'Failed to save content',
+          details: error?.message || 'Unknown error',
+          stack: process.env.NODE_ENV === 'development' ? error?.stack : undefined
+        },
+        { status: 500 }
+      )
+    } catch (jsonError) {
+      // Fallback if JSON.stringify fails
+      return new NextResponse(
+        JSON.stringify({ error: 'Failed to save content', details: 'Internal server error' }),
+        { 
+          status: 500,
+          headers: { 'Content-Type': 'application/json' }
+        }
+      )
+    }
   }
 }

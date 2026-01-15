@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
-import { del } from '@vercel/blob'
 import { cookies } from 'next/headers'
 import { isSessionValid, type AdminSession } from '@/lib/auth'
+import { deleteImage } from '@/lib/imageStorage'
 
 export const dynamic = 'force-dynamic'
 
@@ -28,20 +28,26 @@ export async function DELETE(request: Request) {
     }
 
     try {
-      // Delete from Vercel Blob using the URL
-      await del(url)
+      // Delete using hybrid storage system
+      await deleteImage(url)
       return NextResponse.json({ success: true })
-    } catch (error) {
+    } catch (error: any) {
       console.error('Delete error:', error)
       return NextResponse.json(
-        { error: 'File not found or already deleted' },
+        { 
+          error: 'File not found or already deleted',
+          details: error.message
+        },
         { status: 404 }
       )
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('Delete image error:', error)
     return NextResponse.json(
-      { error: 'Failed to delete image' },
+      { 
+        error: 'Failed to delete image',
+        details: error.message || 'Unknown error'
+      },
       { status: 500 }
     )
   }

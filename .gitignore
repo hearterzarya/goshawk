@@ -35,6 +35,7 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# admin uploads
+# admin uploads (keep directory structure but ignore files)
 /public/uploads/*
+!/public/uploads/
 !/public/uploads/.gitkeep

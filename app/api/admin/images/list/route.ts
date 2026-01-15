@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
-import { list } from '@vercel/blob'
 import { cookies } from 'next/headers'
 import { isSessionValid, type AdminSession } from '@/lib/auth'
+import { listImages } from '@/lib/imageStorage'
 
 export const dynamic = 'force-dynamic'
 
@@ -20,24 +20,18 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // List all blobs in the uploads folder
-    const { blobs } = await list({
-      prefix: 'uploads/',
-    })
-
-    // Filter for images only and extract URLs
-    const images = blobs
-      .filter(blob => {
-        const extension = blob.pathname.split('.').pop()?.toLowerCase()
-        return ['jpg', 'jpeg', 'png', 'gif', 'webp', 'avif'].includes(extension || '')
-      })
-      .map(blob => blob.url)
+    // List images using hybrid storage system
+    const images = await listImages()
 
     return NextResponse.json({ images })
-  } catch (error) {
+  } catch (error: any) {
     console.error('List images error:', error)
     return NextResponse.json(
-      { error: 'Failed to list images' },
+      { 
+        error: 'Failed to list images',
+        details: error.message || 'Unknown error',
+        images: [] // Return empty array on error
+      },
       { status: 500 }
     )
   }

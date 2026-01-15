@@ -142,14 +142,27 @@ export default function EditAboutContentPage() {
         body: JSON.stringify(formData),
       })
 
+      // Check if response has content before parsing JSON
+      const contentType = response.headers.get('content-type')
+      if (!contentType || !contentType.includes('application/json')) {
+        const text = await response.text()
+        throw new Error(`Invalid response: ${text || 'Empty response'}`)
+      }
+
+      const data = await response.json()
+
       if (response.ok) {
         alert('Content saved successfully!')
       } else {
-        const data = await response.json()
         alert(`Failed to save content: ${data.error || 'Unknown error'}${data.details ? `\n\nDetails: ${data.details}` : ''}`)
       }
     } catch (error: any) {
-      alert(`Error saving content: ${error?.message || 'Network error'}`)
+      console.error('Save error:', error)
+      if (error.message?.includes('JSON')) {
+        alert(`Error saving content: Invalid response from server. Please check the console for details.`)
+      } else {
+        alert(`Error saving content: ${error?.message || 'Network error'}`)
+      }
     } finally {
       setSaving(false)
     }

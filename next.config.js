@@ -7,8 +7,14 @@ const nextConfig = {
         protocol: 'https',
         hostname: '*.public.blob.vercel-storage.com',
       },
+      {
+        protocol: 'https',
+        hostname: '*.blob.vercel-storage.com',
+      },
     ],
     formats: ['image/avif', 'image/webp'],
+    // Allow local uploads directory
+    unoptimized: false,
   },
   experimental: {
     optimizePackageImports: ['lucide-react'],
