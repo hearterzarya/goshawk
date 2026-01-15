@@ -232,7 +232,7 @@ export default function EditAboutContentPage() {
                   value={formData.heroImage}
                   onChange={(e) => setFormData({ ...formData, heroImage: e.target.value })}
                   className="flex-1 px-4 py-2 border border-navy-300 rounded-lg"
-                  placeholder="/uploads/image.jpg"
+                  placeholder="Enter Vercel Blob URL or any image URL"
                 />
                 <Button
                   type="button"
@@ -371,7 +371,7 @@ export default function EditAboutContentPage() {
                   value={formData.missionImage}
                   onChange={(e) => setFormData({ ...formData, missionImage: e.target.value })}
                   className="flex-1 px-4 py-2 border border-navy-300 rounded-lg"
-                  placeholder="/uploads/image.jpg"
+                  placeholder="Enter Vercel Blob URL or any image URL"
                 />
                 <Button
                   type="button"

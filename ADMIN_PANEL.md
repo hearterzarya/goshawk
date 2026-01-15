@@ -43,7 +43,7 @@ Navigate to: `http://localhost:3000/admin/login`
 - View all uploaded images
 - Copy image URLs
 - Delete images
-- Images are stored in `/public/uploads/`
+- Images are stored in **Vercel Blob Storage** (cloud storage)
 
 ### 6. Content Management
 - Edit page content (Home, About, Contact)
@@ -53,9 +53,11 @@ Navigate to: `http://localhost:3000/admin/login`
 
 1. Go to **Images** section
 2. Drag and drop an image or click to select
-3. Supported formats: JPG, PNG, GIF, WebP
+3. Supported formats: JPG, PNG, GIF, WebP, AVIF
 4. Max file size: 5MB
-5. Uploaded images are available at `/uploads/filename`
+5. Images are uploaded to **Vercel Blob Storage**
+6. Copy the full URL (e.g., `https://*.public.blob.vercel-storage.com/...`) to use in content
+7. Images are automatically optimized and served via CDN
 
 ## Security Notes
 

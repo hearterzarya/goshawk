@@ -28,9 +28,10 @@ URL: `http://localhost:3000/admin/login`
 ### ✅ Images
 - Go to: `/admin/images`
 - Drag & drop or click to upload
-- Images saved to `/public/uploads/`
-- Copy image URL to use in content
+- Images saved to **Vercel Blob Storage** (cloud)
+- Copy the full image URL to use in content
 - Click X to delete images
+- Requires `BLOB_READ_WRITE_TOKEN` in `.env.local` (see `ENV_SETUP.md`)
 
 ### ✅ Home Page Content
 - Go to: `/admin/content` → Click "Home Page"
@@ -41,10 +42,11 @@ URL: `http://localhost:3000/admin/login`
 ## Image Usage
 
 After uploading images:
-1. Copy the image URL (e.g., `/uploads/image.jpg`)
+1. Copy the full image URL (e.g., `https://*.public.blob.vercel-storage.com/uploads/...`)
 2. Use in:
    - Hero background (Home content editor)
-   - Service cards (coming soon)
+   - Service images
+   - About page images
    - Any content that needs images
 
 ## Troubleshooting
@@ -54,9 +56,10 @@ After uploading images:
 - Check that the page exists (some edit pages need items to exist first)
 
 **Can't see images?**
-- Make sure `/public/uploads/` folder exists
+- Make sure `BLOB_READ_WRITE_TOKEN` is set in `.env.local` (see `ENV_SETUP.md`)
 - Check browser console for errors
 - Verify image was uploaded successfully
+- Ensure you're using the full Vercel Blob URL (not local paths)
 
 **Changes not showing?**
 - Refresh the page

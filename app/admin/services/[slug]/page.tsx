@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { ArrowLeft, Save, Loader2 } from 'lucide-react'
@@ -186,7 +187,7 @@ export default function EditServicePage() {
                   value={formData.image || ''}
                   onChange={(e) => setFormData({ ...formData, image: e.target.value })}
                   className="flex-1 px-4 py-2 border border-navy-300 rounded-lg"
-                  placeholder="/uploads/image.jpg or leave empty to use icon"
+                  placeholder="Enter Vercel Blob URL or leave empty to use icon"
                 />
                 <Button
                   type="button"
@@ -199,10 +200,11 @@ export default function EditServicePage() {
               </div>
               {formData.image && (
                 <div className="mt-2 relative w-full h-48 bg-navy-50 rounded-lg overflow-hidden">
-                  <img
+                  <Image
                     src={formData.image}
                     alt="Preview"
-                    className="w-full h-full object-cover"
+                    fill
+                    className="object-cover"
                     onError={(e) => {
                       (e.target as HTMLImageElement).style.display = 'none'
                     }}
@@ -227,10 +229,11 @@ export default function EditServicePage() {
                             : 'border-navy-300 hover:border-primary-400'
                         }`}
                       >
-                        <img
+                        <Image
                           src={imgUrl}
                           alt="Select"
-                          className="w-full h-full object-cover"
+                          fill
+                          className="object-cover"
                         />
                       </button>
                     ))}
