@@ -1,0 +1,32 @@
+{
+  "badge": "About Goshawk",
+  "headline": "Building Trust Through Excellence",
+  "subtext": "Goshawk Logistics is a premium freight brokerage dedicated to delivering reliable, transparent, and efficient transportation solutions. We connect shippers with verified carriers across North America, ensuring your freight moves safely and on time.",
+  "missionTitle": "Our Mission",
+  "missionParagraph1": "At Goshawk Logistics, our mission is simple: to make freight shipping seamless, reliable, and transparent. We believe that logistics shouldn't be complicated. By combining experienced professionals, verified carrier networks, and modern technology, we deliver solutions that move your business forward.",
+  "missionParagraph2": "Whether you're shipping a single pallet or managing complex supply chains, we're here to provide the expertise, support, and reliability you need. Our commitment to excellence drives everything we do, from carrier selection to customer service.",
+  "heroImage": "/uploads/1768478270174-ChatGPT_Image_Jan_15__2026__03_54_39_PM.png",
+  "missionImage": "/uploads/1768478238780-ChatGPT_Image_Jan_15__2026__03_54_39_PM.png",
+  "valuesTitle": "Our Values",
+  "valuesSubtext": "The principles that guide everything we do",
+  "ctaTitle": "Let's Work Together",
+  "ctaText": "Ready to experience the Goshawk difference? Get in touch with our team today.",
+  "values": [
+    {
+      "title": "Reliability",
+      "description": "We build our reputation on consistent, on-time delivery and transparent communication."
+    },
+    {
+      "title": "Excellence",
+      "description": "Every shipment matters. We maintain the highest standards in carrier selection and service quality."
+    },
+    {
+      "title": "Partnership",
+      "description": "We view every relationship as a long-term partnership, not just a transaction."
+    },
+    {
+      "title": "Innovation",
+      "description": "Leveraging technology and best practices to continuously improve our services."
+    }
+  ]
+}

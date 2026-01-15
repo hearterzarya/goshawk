@@ -1,0 +1,65 @@
+export interface Testimonial {
+  id: string
+  name: string
+  role: string
+  company: string
+  content: string
+  rating: number
+}
+
+export const testimonials: Testimonial[] = [
+  {
+    id: '1',
+    name: 'Sarah Martinez',
+    role: 'Operations Manager',
+    company: 'Fresh Produce Distributors',
+    content:
+      'Goshawk has transformed our refrigerated shipping operations. Their attention to temperature control and real-time updates gives us complete confidence in our supply chain. The team is responsive, professional, and always goes above and beyond.',
+    rating: 5,
+  },
+  {
+    id: '2',
+    name: 'Michael Chen',
+    role: 'Logistics Director',
+    company: 'Auto Parts Manufacturing',
+    content:
+      'We\'ve been working with Goshawk for over two years, and they consistently deliver. Their flatbed expertise and ability to handle our oversized equipment shipments has been invaluable. On-time delivery rates have improved significantly.',
+    rating: 5,
+  },
+  {
+    id: '3',
+    name: 'Jennifer Williams',
+    role: 'Supply Chain Coordinator',
+    company: 'Retail Distribution Center',
+    content:
+      'The LTL solutions from Goshawk have helped us optimize our shipping costs without sacrificing service quality. Their transparent pricing and reliable carriers make them our go-to partner for all freight needs.',
+    rating: 5,
+  },
+  {
+    id: '4',
+    name: 'David Rodriguez',
+    role: 'Fleet Manager',
+    company: 'Independent Carrier Network',
+    content:
+      'As a carrier partner, Goshawk provides consistent loads and fair rates. Their dispatch team is professional, and payments are always on time. They\'ve become one of our most trusted brokerage partners.',
+    rating: 5,
+  },
+  {
+    id: '5',
+    name: 'Amanda Thompson',
+    role: 'VP of Operations',
+    company: 'Consumer Goods Manufacturer',
+    content:
+      'Goshawk\'s intermodal services have reduced our shipping costs by over 20% on long-haul routes. The combination of rail and truck gives us the best of both worlds: cost efficiency and reliable delivery.',
+    rating: 5,
+  },
+  {
+    id: '6',
+    name: 'Robert Kim',
+    role: 'Import/Export Manager',
+    company: 'International Trading Company',
+    content:
+      'Cross-border shipping can be complex, but Goshawk makes it seamless. Their expertise in customs documentation and border procedures has eliminated delays and simplified our international operations.',
+    rating: 5,
+  },
+]
