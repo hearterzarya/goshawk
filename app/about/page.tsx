@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
-import { SafeImage } from '@/components/ui/SafeImage'
 import { Section } from '@/components/ui/Section'
 import { Container } from '@/components/ui/Container'
 import { Card } from '@/components/ui/Card'
@@ -99,7 +98,7 @@ export default function AboutPage() {
         {/* Background Image or Gradient */}
         {content.heroImage ? (
           <div className="absolute inset-0">
-            <SafeImage
+            <Image
               src={content.heroImage}
               alt="About background"
               fill
@@ -166,7 +165,7 @@ export default function AboutPage() {
               {/* Mission Image */}
               <div className="relative h-96 rounded-2xl overflow-hidden shadow-2xl">
                 {content.missionImage ? (
-                  <SafeImage
+                  <Image
                     src={content.missionImage}
                     alt="Our mission"
                     fill

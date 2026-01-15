@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
-import { SafeImage } from '@/components/ui/SafeImage'
 import { Button } from '@/components/ui/Button'
 import { Check, Truck, Package, ArrowRight, MapPin, Zap } from 'lucide-react'
 
@@ -337,20 +336,20 @@ export function Hero() {
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-white pt-20">
       {/* Hero Background Image or Gradient */}
-          {content.heroImage ? (
-            <div className="absolute inset-0">
-              <SafeImage
-                src={content.heroImage}
-                alt="Hero background"
-                fill
-                className="object-cover opacity-20"
-                priority
-              />
-              <div className="absolute inset-0 bg-gradient-to-br from-orange-50/80 via-white/80 to-amber-50/80" />
-            </div>
-          ) : (
-            <div className="absolute inset-0 bg-gradient-to-br from-orange-50 via-white to-amber-50" />
-          )}
+      {content.heroImage ? (
+        <div className="absolute inset-0">
+          <Image
+            src={content.heroImage}
+            alt="Hero background"
+            fill
+            className="object-cover opacity-20"
+            priority
+          />
+          <div className="absolute inset-0 bg-gradient-to-br from-orange-50/80 via-white/80 to-amber-50/80" />
+        </div>
+      ) : (
+        <div className="absolute inset-0 bg-gradient-to-br from-orange-50 via-white to-amber-50" />
+      )}
       
       {/* Subtle Grid Pattern */}
       <div className="absolute inset-0 opacity-[0.02]">

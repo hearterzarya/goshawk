@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { SafeImage } from '@/components/ui/SafeImage'
 import { Card } from '@/components/ui/Card'
 import { Section } from '@/components/ui/Section'
 import { Container } from '@/components/ui/Container'
@@ -55,16 +54,11 @@ export function ServicesOverview() {
               {/* Service Image or Icon */}
               <div className="relative w-full h-48 bg-navy-50 rounded-t-lg mb-4 overflow-hidden">
                 {service.image ? (
-                  <SafeImage
+                  <Image
                     src={service.image}
                     alt={service.title}
                     fill
                     className="object-cover"
-                    fallback={
-                      <div className="flex items-center justify-center h-full text-6xl">
-                        {service.icon}
-                      </div>
-                    }
                   />
                 ) : (
                   <div className="flex items-center justify-center h-full text-6xl">
