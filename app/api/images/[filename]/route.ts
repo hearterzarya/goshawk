@@ -28,8 +28,24 @@ export async function GET(
     }
     
     if (!image) {
-      console.error(`Image not found: ${filename}`)
-      return new NextResponse('Image not found', { status: 404 })
+      console.error(`Image not found in database: ${filename}`)
+      return new NextResponse('Image not found', { 
+        status: 404,
+        headers: {
+          'Content-Type': 'text/plain',
+        }
+      })
+    }
+
+    // Validate image data
+    if (!image.data || image.data.length === 0) {
+      console.error(`Image data is empty: ${filename}`)
+      return new NextResponse('Image data is empty', { 
+        status: 500,
+        headers: {
+          'Content-Type': 'text/plain',
+        }
+      })
     }
 
     // Return image with proper headers
@@ -38,9 +54,10 @@ export async function GET(
     
     return new NextResponse(uint8Array, {
       headers: {
-        'Content-Type': image.mimeType,
+        'Content-Type': image.mimeType || 'image/jpeg',
         'Content-Length': image.size.toString(),
         'Cache-Control': 'public, max-age=31536000, immutable',
+        'Access-Control-Allow-Origin': '*',
       },
     })
   } catch (error: any) {
@@ -49,6 +66,11 @@ export async function GET(
       message: error.message,
       stack: error.stack,
     })
-    return new NextResponse(`Error serving image: ${error.message}`, { status: 500 })
+    return new NextResponse(`Error serving image: ${error.message}`, { 
+      status: 500,
+      headers: {
+        'Content-Type': 'text/plain',
+      }
+    })
   }
 }

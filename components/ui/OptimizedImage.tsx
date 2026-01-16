@@ -33,6 +33,20 @@ export function OptimizedImage({
   ...props
 }: OptimizedImageProps) {
   const [error, setError] = useState(false)
+  const [loading, setLoading] = useState(true)
+  
+  // Don't render if src is empty or invalid
+  if (!src || src.trim() === '' || src === 'null' || src === 'undefined') {
+    return (
+      <div
+        className={`bg-navy-100 flex items-center justify-center ${className}`}
+        style={fill ? { position: 'absolute', inset: 0 } : { width, height }}
+      >
+        <span className="text-navy-400 text-sm">No image</span>
+      </div>
+    )
+  }
+  
   const normalizedSrc = normalizeImageUrl(src)
   const isExternal = isExternalUrl(normalizedSrc)
   
@@ -54,39 +68,63 @@ export function OptimizedImage({
   
   if (fill) {
     return (
-      <Image
-        src={normalizedSrc}
-        alt={alt}
-        fill
-        className={className}
-        priority={priority}
-        unoptimized={useUnoptimized}
-        onError={() => {
-          console.error('Image load error:', normalizedSrc)
-          setError(true)
-        }}
-        style={{ objectFit }}
-        {...props}
-      />
+      <>
+        {loading && (
+          <div
+            className={`bg-navy-100 flex items-center justify-center ${className}`}
+            style={{ position: 'absolute', inset: 0 }}
+          >
+            <span className="text-navy-400 text-sm">Loading...</span>
+          </div>
+        )}
+        <Image
+          src={normalizedSrc}
+          alt={alt}
+          fill
+          className={className}
+          priority={priority}
+          unoptimized={useUnoptimized}
+          onLoad={() => setLoading(false)}
+          onError={(e) => {
+            console.error('Image load error:', normalizedSrc, e)
+            setError(true)
+            setLoading(false)
+          }}
+          style={{ objectFit }}
+          {...props}
+        />
+      </>
     )
   }
 
   return (
-    <Image
-      src={normalizedSrc}
-      alt={alt}
-      width={width}
-      height={height}
-      className={className}
-      priority={priority}
-      sizes={sizes}
-      unoptimized={useUnoptimized}
-      onError={() => {
-        console.error('Image load error:', normalizedSrc)
-        setError(true)
-      }}
-      style={{ objectFit }}
-      {...props}
-    />
+    <>
+      {loading && (
+        <div
+          className={`bg-navy-100 flex items-center justify-center ${className}`}
+          style={{ width, height }}
+        >
+          <span className="text-navy-400 text-sm">Loading...</span>
+        </div>
+      )}
+      <Image
+        src={normalizedSrc}
+        alt={alt}
+        width={width}
+        height={height}
+        className={className}
+        priority={priority}
+        sizes={sizes}
+        unoptimized={useUnoptimized}
+        onLoad={() => setLoading(false)}
+        onError={(e) => {
+          console.error('Image load error:', normalizedSrc, e)
+          setError(true)
+          setLoading(false)
+        }}
+        style={{ objectFit }}
+        {...props}
+      />
+    </>
   )
 }
