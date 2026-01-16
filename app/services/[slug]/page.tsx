@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { notFound, useParams } from 'next/navigation'
-import Image from 'next/image'
+import { OptimizedImage } from '@/components/ui/OptimizedImage'
 import { Section } from '@/components/ui/Section'
 import { Container } from '@/components/ui/Container'
 import { Card } from '@/components/ui/Card'
@@ -101,11 +101,12 @@ export default function ServicePage() {
             {/* Service Image or Icon */}
             {service.image ? (
               <div className="relative w-full h-96 mb-8 rounded-lg overflow-hidden shadow-xl">
-                <Image
+                <OptimizedImage
                   src={service.image}
                   alt={service.title}
                   fill
                   className="object-cover"
+                  objectFit="cover"
                 />
               </div>
             ) : (

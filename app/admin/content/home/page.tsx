@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/Button'
 import { ArrowLeft, Save, Loader2, Image as ImageIcon, Upload, X, Plus } from 'lucide-react'
 import { FormField } from '@/components/forms/FormField'
 import { TextareaField } from '@/components/forms/TextareaField'
-import Image from 'next/image'
+import { OptimizedImage } from '@/components/ui/OptimizedImage'
 
 export default function EditHomeContentPage() {
   const [loading, setLoading] = useState(false)
@@ -312,7 +312,7 @@ export default function EditHomeContentPage() {
                         }`}
                         onClick={() => setFormData({ ...formData, heroImage: url })}
                       >
-                        <Image src={url} alt="Hero" fill className="object-cover" />
+                        <OptimizedImage src={url} alt="Hero" fill className="object-cover" objectFit="cover" />
                         {formData.heroImage === url && (
                           <div className="absolute inset-0 bg-primary-600/20 flex items-center justify-center">
                             <div className="bg-primary-600 text-white rounded-full p-2">
@@ -343,19 +343,12 @@ export default function EditHomeContentPage() {
                     Preview
                   </label>
                   <div className="relative w-full h-48 border border-navy-200 rounded-lg overflow-hidden bg-navy-50">
-                    <Image
+                    <OptimizedImage
                       src={formData.heroImage}
                       alt="Hero preview"
                       fill
                       className="object-cover"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement
-                        target.style.display = 'none'
-                        const parent = target.parentElement
-                        if (parent) {
-                          parent.innerHTML = '<div class="flex items-center justify-center h-full text-navy-400 text-sm">Image not found</div>'
-                        }
-                      }}
+                      objectFit="cover"
                     />
                   </div>
                 </div>

@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import Image from 'next/image'
+import { OptimizedImage } from '@/components/ui/OptimizedImage'
 import { Button } from '@/components/ui/Button'
 import { Check, Truck, Package, ArrowRight, MapPin, Zap } from 'lucide-react'
 
@@ -338,12 +338,13 @@ export function Hero() {
       {/* Hero Background Image or Gradient */}
       {content.heroImage ? (
         <div className="absolute inset-0">
-          <Image
+          <OptimizedImage
             src={content.heroImage}
             alt="Hero background"
             fill
             className="object-cover opacity-20"
             priority
+            objectFit="cover"
           />
           <div className="absolute inset-0 bg-gradient-to-br from-orange-50/80 via-white/80 to-amber-50/80" />
         </div>

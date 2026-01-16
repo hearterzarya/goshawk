@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { ArrowLeft, Upload, X } from 'lucide-react'
-import Image from 'next/image'
+import { OptimizedImage } from '@/components/ui/OptimizedImage'
 
 export default function AdminImagesPage() {
   const [uploading, setUploading] = useState(false)
@@ -170,11 +170,12 @@ export default function AdminImagesPage() {
             {images.map((url, index) => (
               <Card key={index} className="relative group">
                 <div className="aspect-square relative">
-                  <Image
+                  <OptimizedImage
                     src={url}
                     alt={`Uploaded ${index + 1}`}
                     fill
                     className="object-cover rounded-lg"
+                    objectFit="cover"
                   />
                 </div>
                 <button

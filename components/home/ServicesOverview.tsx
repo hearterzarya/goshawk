@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
+import { OptimizedImage } from '@/components/ui/OptimizedImage'
 import { Card } from '@/components/ui/Card'
 import { Section } from '@/components/ui/Section'
 import { Container } from '@/components/ui/Container'
@@ -54,11 +54,12 @@ export function ServicesOverview() {
               {/* Service Image or Icon */}
               <div className="relative w-full h-48 bg-navy-50 rounded-t-lg mb-4 overflow-hidden">
                 {service.image ? (
-                  <Image
+                  <OptimizedImage
                     src={service.image}
                     alt={service.title}
                     fill
                     className="object-cover"
+                    objectFit="cover"
                   />
                 ) : (
                   <div className="flex items-center justify-center h-full text-6xl">

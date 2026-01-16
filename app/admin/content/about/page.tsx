@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/Button'
 import { ArrowLeft, Save, Loader2, Plus, X, Upload, Image as ImageIcon } from 'lucide-react'
 import { FormField } from '@/components/forms/FormField'
 import { TextareaField } from '@/components/forms/TextareaField'
-import Image from 'next/image'
+import { OptimizedImage } from '@/components/ui/OptimizedImage'
 
 interface Value {
   title: string
@@ -327,7 +327,7 @@ export default function EditAboutContentPage() {
                               : 'border-navy-300 hover:border-primary-400'
                           }`}
                         >
-                          <Image src={url} alt="Select" fill className="object-cover" />
+                          <OptimizedImage src={url} alt="Select" fill className="object-cover" objectFit="cover" />
                         </button>
                       ))}
                     </div>
@@ -336,11 +336,12 @@ export default function EditAboutContentPage() {
               )}
               {formData.heroImage && (
                 <div className="relative w-full h-48 border border-navy-200 rounded-lg overflow-hidden bg-navy-50">
-                  <Image
+                  <OptimizedImage
                     src={formData.heroImage}
                     alt="Hero preview"
                     fill
                     className="object-cover"
+                    objectFit="cover"
                   />
                 </div>
               )}
@@ -466,7 +467,7 @@ export default function EditAboutContentPage() {
                               : 'border-navy-300 hover:border-primary-400'
                           }`}
                         >
-                          <Image src={url} alt="Select" fill className="object-cover" />
+                          <OptimizedImage src={url} alt="Select" fill className="object-cover" objectFit="cover" />
                         </button>
                       ))}
                     </div>
@@ -475,11 +476,12 @@ export default function EditAboutContentPage() {
               )}
               {formData.missionImage && (
                 <div className="relative w-full h-48 border border-navy-200 rounded-lg overflow-hidden bg-navy-50">
-                  <Image
+                  <OptimizedImage
                     src={formData.missionImage}
                     alt="Mission preview"
                     fill
                     className="object-cover"
+                    objectFit="cover"
                   />
                 </div>
               )}

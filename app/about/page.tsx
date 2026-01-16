@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import Image from 'next/image'
+import { OptimizedImage } from '@/components/ui/OptimizedImage'
 import { Section } from '@/components/ui/Section'
 import { Container } from '@/components/ui/Container'
 import { Card } from '@/components/ui/Card'
@@ -98,12 +98,13 @@ export default function AboutPage() {
         {/* Background Image or Gradient */}
         {content.heroImage ? (
           <div className="absolute inset-0">
-            <Image
+            <OptimizedImage
               src={content.heroImage}
               alt="About background"
               fill
               className="object-cover opacity-15"
               priority
+              objectFit="cover"
             />
             <div className="absolute inset-0 bg-gradient-to-br from-orange-50/90 via-white/90 to-amber-50/90" />
           </div>
@@ -165,11 +166,12 @@ export default function AboutPage() {
               {/* Mission Image */}
               <div className="relative h-96 rounded-2xl overflow-hidden shadow-2xl">
                 {content.missionImage ? (
-                  <Image
+                  <OptimizedImage
                     src={content.missionImage}
                     alt="Our mission"
                     fill
                     className="object-cover"
+                    objectFit="cover"
                   />
                 ) : (
                   <div className="w-full h-full bg-gradient-to-br from-primary-400 to-orange-500 flex items-center justify-center">
