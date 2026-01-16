@@ -276,6 +276,7 @@ export const homeContentDb = {
  */
 export const aboutContentDb = {
   async get() {
+    checkDb()
     const result = await sql`
       SELECT 
         badge,
@@ -353,6 +354,7 @@ export const aboutContentDb = {
  */
 export const contactContentDb = {
   async get() {
+    checkDb()
     const result = await sql`
       SELECT 
         headline,

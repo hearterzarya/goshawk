@@ -333,7 +333,7 @@ export default function EditHomeContentPage() {
                 label="Or enter image URL manually"
                 value={formData.heroImage}
                 onChange={(e) => setFormData({ ...formData, heroImage: e.target.value })}
-                placeholder="Enter Vercel Blob URL or any image URL"
+                placeholder="Enter image URL (e.g., /api/images/filename.jpg)"
               />
 
               {/* Preview */}
