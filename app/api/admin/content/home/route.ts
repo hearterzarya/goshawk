@@ -1,17 +1,16 @@
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { isSessionValid, type AdminSession } from '@/lib/auth'
-import { writeFile, readFile, mkdir } from 'fs/promises'
+import { homeContentDb } from '@/lib/db'
+import { readFile } from 'fs/promises'
 import { join } from 'path'
 
-const CONTENT_FILE = join(process.cwd(), 'data', 'home-content.json')
-
-async function getContent() {
+// Fallback to JSON if DB fails
+async function getContentFallback() {
   try {
-    const file = await readFile(CONTENT_FILE, 'utf-8')
+    const file = await readFile(join(process.cwd(), 'data', 'home-content.json'), 'utf-8')
     return JSON.parse(file)
   } catch {
-    // Return default content
     return {
       headline: 'Logistics that moves your business forward',
       subtext: 'Premium freight brokerage and transportation solutions. From full truckload to cross-border shipping, we deliver reliability, transparency, and 24/7 support.',
@@ -22,29 +21,23 @@ async function getContent() {
   }
 }
 
-async function saveContent(content: any) {
-  try {
-    // Validate content is valid JSON-serializable
-    const jsonString = JSON.stringify(content, null, 2)
-    await writeFile(CONTENT_FILE, jsonString, 'utf-8')
-  } catch (error: any) {
-    throw new Error(`Failed to write file: ${error.message}`)
-  }
-}
+export const dynamic = 'force-dynamic'
 
 export async function GET() {
   try {
-    const content = await getContent()
-    return NextResponse.json(content)
+    const content = await homeContentDb.get()
+    if (content) {
+      return NextResponse.json(content)
+    }
+    // If no content in DB, try fallback
+    const fallbackContent = await getContentFallback()
+    return NextResponse.json(fallbackContent)
   } catch (error) {
-    return NextResponse.json(
-      { error: 'Failed to load content' },
-      { status: 500 }
-    )
+    console.error('DB error, falling back to JSON:', error)
+    const content = await getContentFallback()
+    return NextResponse.json(content)
   }
 }
-
-export const dynamic = 'force-dynamic'
 
 export async function PUT(request: Request) {
   try {
@@ -83,15 +76,7 @@ export async function PUT(request: Request) {
       )
     }
     
-    // Ensure data directory exists
-    const dataDir = join(process.cwd(), 'data')
-    try {
-      await mkdir(dataDir, { recursive: true })
-    } catch (error) {
-      // Directory might already exist, ignore error
-    }
-    
-    await saveContent(content)
+    await homeContentDb.update(content)
 
     return NextResponse.json(
       { success: true, content }, 

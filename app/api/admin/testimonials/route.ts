@@ -1,19 +1,17 @@
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { isSessionValid, type AdminSession } from '@/lib/auth'
-import { writeFile, readFile } from 'fs/promises'
+import { testimonialsDb } from '@/lib/db'
+import { readFile } from 'fs/promises'
 import { join } from 'path'
 
-const DATA_FILE = join(process.cwd(), 'data', 'testimonials.json')
-
-async function getTestimonials() {
+// Fallback to JSON if DB fails
+async function getTestimonialsFallback() {
   try {
-    const file = await readFile(DATA_FILE, 'utf-8')
+    const file = await readFile(join(process.cwd(), 'data', 'testimonials.json'), 'utf-8')
     const data = JSON.parse(file)
-    // Ensure it's an array
     return Array.isArray(data) ? data : []
-  } catch (error) {
-    // Fallback to default data
+  } catch {
     try {
       const { testimonials } = await import('@/data/testimonials')
       return testimonials
@@ -23,19 +21,16 @@ async function getTestimonials() {
   }
 }
 
-async function saveTestimonials(testimonials: any[]) {
-  await writeFile(DATA_FILE, JSON.stringify(testimonials, null, 2), 'utf-8')
-}
+export const dynamic = 'force-dynamic'
 
 export async function GET() {
   try {
-    const testimonials = await getTestimonials()
+    const testimonials = await testimonialsDb.getAll()
     return NextResponse.json(testimonials)
   } catch (error) {
-    return NextResponse.json(
-      { error: 'Failed to load testimonials' },
-      { status: 500 }
-    )
+    console.error('DB error, falling back to JSON:', error)
+    const testimonials = await getTestimonialsFallback()
+    return NextResponse.json(testimonials)
   }
 }
 
@@ -54,9 +49,7 @@ export async function POST(request: Request) {
     }
 
     const newTestimonial = await request.json()
-    const testimonials = await getTestimonials()
-    testimonials.push(newTestimonial)
-    await saveTestimonials(testimonials)
+    await testimonialsDb.create(newTestimonial)
 
     return NextResponse.json({ success: true, testimonial: newTestimonial })
   } catch (error) {
@@ -82,15 +75,13 @@ export async function PUT(request: Request) {
     }
 
     const updatedTestimonial = await request.json()
-    const testimonials = await getTestimonials()
-    const index = testimonials.findIndex((t: any) => t.id === updatedTestimonial.id)
+    const existing = await testimonialsDb.getById(updatedTestimonial.id)
     
-    if (index === -1) {
+    if (!existing) {
       return NextResponse.json({ error: 'Testimonial not found' }, { status: 404 })
     }
 
-    testimonials[index] = updatedTestimonial
-    await saveTestimonials(testimonials)
+    await testimonialsDb.update(updatedTestimonial)
 
     return NextResponse.json({ success: true, testimonial: updatedTestimonial })
   } catch (error) {
@@ -122,9 +113,7 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: 'ID required' }, { status: 400 })
     }
 
-    const testimonials = await getTestimonials()
-    const filtered = testimonials.filter((t: any) => t.id !== id)
-    await saveTestimonials(filtered)
+    await testimonialsDb.delete(id)
 
     return NextResponse.json({ success: true })
   } catch (error) {

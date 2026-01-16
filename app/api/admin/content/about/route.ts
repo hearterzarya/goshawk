@@ -1,63 +1,55 @@
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { isSessionValid, type AdminSession } from '@/lib/auth'
-import { writeFile, readFile, mkdir } from 'fs/promises'
+import { aboutContentDb } from '@/lib/db'
+import { readFile } from 'fs/promises'
 import { join } from 'path'
 
-const CONTENT_FILE = join(process.cwd(), 'data', 'about-content.json')
-
-async function getContent() {
+// Fallback to JSON if DB fails
+async function getContentFallback() {
   try {
-    const file = await readFile(CONTENT_FILE, 'utf-8')
+    const file = await readFile(join(process.cwd(), 'data', 'about-content.json'), 'utf-8')
     return JSON.parse(file)
   } catch {
-    // Return default content
-    return {
+    return null
+  }
+}
+
+export const dynamic = 'force-dynamic'
+
+export async function GET() {
+  try {
+    const content = await aboutContentDb.get()
+    if (content) {
+      return NextResponse.json(content)
+    }
+    // If no content in DB, try fallback
+    const fallbackContent = await getContentFallback()
+    if (fallbackContent) {
+      return NextResponse.json(fallbackContent)
+    }
+    // Return default if nothing found
+    return NextResponse.json({
       badge: 'About Goshawk',
       headline: 'Building Trust Through Excellence',
-      subtext: 'Goshawk Logistics is a premium freight brokerage dedicated to delivering reliable, transparent, and efficient transportation solutions. We connect shippers with verified carriers across North America, ensuring your freight moves safely and on time.',
+      subtext: 'Goshawk Logistics is a premium freight brokerage dedicated to delivering reliable, transparent, and efficient transportation solutions.',
       missionTitle: 'Our Mission',
-      missionParagraph1: 'At Goshawk Logistics, our mission is simple: to make freight shipping seamless, reliable, and transparent. We believe that logistics shouldn\'t be complicated. By combining experienced professionals, verified carrier networks, and modern technology, we deliver solutions that move your business forward.',
-      missionParagraph2: 'Whether you\'re shipping a single pallet or managing complex supply chains, we\'re here to provide the expertise, support, and reliability you need. Our commitment to excellence drives everything we do, from carrier selection to customer service.',
+      missionParagraph1: 'At Goshawk Logistics, our mission is simple: to make freight shipping seamless, reliable, and transparent.',
+      missionParagraph2: 'We connect shippers with verified carriers across North America.',
       heroImage: '',
       missionImage: '',
       valuesTitle: 'Our Values',
       valuesSubtext: 'The principles that guide everything we do',
       ctaTitle: 'Let\'s Work Together',
       ctaText: 'Ready to experience the Goshawk difference? Get in touch with our team today.',
-      values: [
-        { title: 'Reliability', description: 'We build our reputation on consistent, on-time delivery and transparent communication.' },
-        { title: 'Excellence', description: 'Every shipment matters. We maintain the highest standards in carrier selection and service quality.' },
-        { title: 'Partnership', description: 'We view every relationship as a long-term partnership, not just a transaction.' },
-        { title: 'Innovation', description: 'Leveraging technology and best practices to continuously improve our services.' },
-      ],
-    }
-  }
-}
-
-async function saveContent(content: any) {
-  try {
-    // Validate content is valid JSON-serializable
-    const jsonString = JSON.stringify(content, null, 2)
-    await writeFile(CONTENT_FILE, jsonString, 'utf-8')
-  } catch (error: any) {
-    throw new Error(`Failed to write file: ${error.message}`)
-  }
-}
-
-export async function GET() {
-  try {
-    const content = await getContent()
-    return NextResponse.json(content)
+      values: [],
+    })
   } catch (error) {
-    return NextResponse.json(
-      { error: 'Failed to load content' },
-      { status: 500 }
-    )
+    console.error('DB error, falling back to JSON:', error)
+    const content = await getContentFallback()
+    return NextResponse.json(content || {})
   }
 }
-
-export const dynamic = 'force-dynamic'
 
 export async function PUT(request: Request) {
   try {
@@ -96,15 +88,7 @@ export async function PUT(request: Request) {
       )
     }
     
-    // Ensure data directory exists
-    const dataDir = join(process.cwd(), 'data')
-    try {
-      await mkdir(dataDir, { recursive: true })
-    } catch (error) {
-      // Directory might already exist, ignore error
-    }
-    
-    await saveContent(content)
+    await aboutContentDb.update(content)
 
     return NextResponse.json(
       { success: true, content }, 

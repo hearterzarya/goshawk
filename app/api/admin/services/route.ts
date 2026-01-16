@@ -1,19 +1,17 @@
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { isSessionValid, type AdminSession } from '@/lib/auth'
-import { writeFile, readFile } from 'fs/promises'
+import { servicesDb } from '@/lib/db'
+import { readFile } from 'fs/promises'
 import { join } from 'path'
 
-const DATA_FILE = join(process.cwd(), 'data', 'services.json')
-
-async function getServices() {
+// Fallback to JSON if DB fails
+async function getServicesFallback() {
   try {
-    const file = await readFile(DATA_FILE, 'utf-8')
+    const file = await readFile(join(process.cwd(), 'data', 'services.json'), 'utf-8')
     const data = JSON.parse(file)
-    // Ensure it's an array
     return Array.isArray(data) ? data : []
-  } catch (error) {
-    // Fallback to default data
+  } catch {
     try {
       const { services } = await import('@/data/services')
       return services
@@ -23,19 +21,17 @@ async function getServices() {
   }
 }
 
-async function saveServices(services: any[]) {
-  await writeFile(DATA_FILE, JSON.stringify(services, null, 2), 'utf-8')
-}
+export const dynamic = 'force-dynamic'
 
 export async function GET() {
   try {
-    const services = await getServices()
+    const services = await servicesDb.getAll()
     return NextResponse.json(services)
   } catch (error) {
-    return NextResponse.json(
-      { error: 'Failed to load services' },
-      { status: 500 }
-    )
+    console.error('DB error, falling back to JSON:', error)
+    // Fallback to JSON if DB is not available
+    const services = await getServicesFallback()
+    return NextResponse.json(services)
   }
 }
 
@@ -54,14 +50,13 @@ export async function POST(request: Request) {
     }
 
     const newService = await request.json()
-    const services = await getServices()
-    services.push(newService)
-    await saveServices(services)
+    await servicesDb.create(newService)
 
     return NextResponse.json({ success: true, service: newService })
-  } catch (error) {
+  } catch (error: any) {
+    console.error('Create service error:', error)
     return NextResponse.json(
-      { error: 'Failed to create service' },
+      { error: 'Failed to create service', details: error.message },
       { status: 500 }
     )
   }
@@ -82,20 +77,19 @@ export async function PUT(request: Request) {
     }
 
     const updatedService = await request.json()
-    const services = await getServices()
-    const index = services.findIndex((s: any) => s.slug === updatedService.slug)
+    const existing = await servicesDb.getBySlug(updatedService.slug)
     
-    if (index === -1) {
+    if (!existing) {
       return NextResponse.json({ error: 'Service not found' }, { status: 404 })
     }
 
-    services[index] = updatedService
-    await saveServices(services)
+    await servicesDb.update(updatedService)
 
     return NextResponse.json({ success: true, service: updatedService })
-  } catch (error) {
+  } catch (error: any) {
+    console.error('Update service error:', error)
     return NextResponse.json(
-      { error: 'Failed to update service' },
+      { error: 'Failed to update service', details: error.message },
       { status: 500 }
     )
   }
@@ -122,14 +116,13 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: 'Slug required' }, { status: 400 })
     }
 
-    const services = await getServices()
-    const filtered = services.filter((s: any) => s.slug !== slug)
-    await saveServices(filtered)
+    await servicesDb.delete(slug)
 
     return NextResponse.json({ success: true })
-  } catch (error) {
+  } catch (error: any) {
+    console.error('Delete service error:', error)
     return NextResponse.json(
-      { error: 'Failed to delete service' },
+      { error: 'Failed to delete service', details: error.message },
       { status: 500 }
     )
   }
