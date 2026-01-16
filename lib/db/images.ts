@@ -21,6 +21,11 @@ export interface ImageRecord {
  * Upload image to database
  */
 export async function uploadImage(file: File): Promise<{ url: string; id: number }> {
+  // Check database is available
+  if (!sql) {
+    throw new Error('DATABASE_URL not configured - database connection unavailable')
+  }
+  
   const timestamp = Date.now()
   const originalName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_')
   const filename = `${timestamp}-${originalName}`
@@ -31,16 +36,43 @@ export async function uploadImage(file: File): Promise<{ url: string; id: number
   const buffer = Buffer.from(bytes)
   
   // Insert into database (BYTEA column)
-  // Neon handles Buffer automatically for BYTEA columns
-  const result = await sql`
-    INSERT INTO images (filename, original_name, mime_type, data, size, url)
-    VALUES (${filename}, ${file.name}, ${file.type}, ${buffer}::bytea, ${file.size}, ${url})
-    RETURNING id, url
-  `
-  
-  return {
-    id: result[0].id,
-    url: result[0].url,
+  // For Neon, we need to use hex format: \x + hex string
+  try {
+    const hexString = buffer.toString('hex')
+    
+    // Use raw SQL with hex format for BYTEA
+    // Neon's sql template literal needs the hex string in PostgreSQL format
+    const result = await sql`
+      INSERT INTO images (filename, original_name, mime_type, data, size, url)
+      VALUES (
+        ${filename}, 
+        ${file.name}, 
+        ${file.type}, 
+        decode(${hexString}, 'hex'), 
+        ${file.size}, 
+        ${url}
+      )
+      RETURNING id, url
+    `
+    
+    if (!result || result.length === 0) {
+      throw new Error('No result returned from database insert')
+    }
+    
+    return {
+      id: result[0].id,
+      url: result[0].url,
+    }
+  } catch (error: any) {
+    console.error('Database upload error:', error)
+    console.error('Error details:', {
+      message: error.message,
+      code: error.code,
+      detail: error.detail,
+      name: error.name,
+    })
+    
+    throw new Error(`Failed to upload image to database: ${error.message}`)
   }
 }
 
@@ -48,13 +80,17 @@ export async function uploadImage(file: File): Promise<{ url: string; id: number
  * Get image by URL or filename
  */
 export async function getImage(urlOrFilename: string): Promise<ImageRecord | null> {
+  if (!sql) {
+    throw new Error('DATABASE_URL not configured')
+  }
+  
   const result = await sql`
     SELECT 
       id,
       filename,
       original_name as "originalName",
       mime_type as "mimeType",
-      data,
+      encode(data, 'hex') as data_hex,
       size,
       url,
       created_at as "createdAt",
@@ -66,9 +102,20 @@ export async function getImage(urlOrFilename: string): Promise<ImageRecord | nul
   
   if (result.length === 0) return null
   
+  const row = result[0]
+  // Convert hex string back to Buffer
+  const imageData = Buffer.from(row.data_hex, 'hex')
+  
   return {
-    ...result[0],
-    data: Buffer.from(result[0].data),
+    id: row.id,
+    filename: row.filename,
+    originalName: row.originalName,
+    mimeType: row.mimeType,
+    data: imageData,
+    size: row.size,
+    url: row.url,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
   } as ImageRecord
 }
 
@@ -76,6 +123,10 @@ export async function getImage(urlOrFilename: string): Promise<ImageRecord | nul
  * List all images
  */
 export async function listImages(): Promise<Array<{ id: number; url: string; filename: string; originalName: string; size: number; createdAt: Date }>> {
+  if (!sql) {
+    throw new Error('DATABASE_URL not configured')
+  }
+  
   const result = await sql`
     SELECT 
       id,
@@ -95,6 +146,10 @@ export async function listImages(): Promise<Array<{ id: number; url: string; fil
  * Delete image by URL or ID
  */
 export async function deleteImage(urlOrId: string | number): Promise<void> {
+  if (!sql) {
+    throw new Error('DATABASE_URL not configured')
+  }
+  
   if (typeof urlOrId === 'number') {
     await sql`DELETE FROM images WHERE id = ${urlOrId}`
   } else {
@@ -106,6 +161,10 @@ export async function deleteImage(urlOrId: string | number): Promise<void> {
  * Get image count
  */
 export async function getImageCount(): Promise<number> {
+  if (!sql) {
+    throw new Error('DATABASE_URL not configured')
+  }
+  
   const result = await sql`SELECT COUNT(*) as count FROM images`
   return parseInt(result[0].count) || 0
 }

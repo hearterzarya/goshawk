@@ -51,10 +51,20 @@ export async function POST(request: Request) {
     console.error('Upload error:', error)
     
     // Provide more specific error messages
-    if (error.message?.includes('token') || error.message?.includes('unauthorized')) {
+    if (error.message?.includes('DATABASE_URL') || error.message?.includes('database')) {
       return NextResponse.json(
         { 
-          error: 'Invalid BLOB_READ_WRITE_TOKEN. Using local storage instead. Check your .env.local file.',
+          error: 'Database connection error. Please check your DATABASE_URL in .env.local',
+          details: error.message
+        },
+        { status: 500 }
+      )
+    }
+    
+    if (error.message?.includes('bytea') || error.message?.includes('BYTEA')) {
+      return NextResponse.json(
+        { 
+          error: 'Image storage error. Please ensure the images table exists in your database.',
           details: error.message
         },
         { status: 500 }
