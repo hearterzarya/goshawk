@@ -8,18 +8,27 @@ export const dynamic = 'force-dynamic'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { filename: string } }
+  { params }: { params: Promise<{ filename: string }> | { filename: string } }
 ) {
   try {
-    const filename = params.filename
+    // Handle both sync and async params (Next.js 14+)
+    const resolvedParams = await Promise.resolve(params)
+    const filename = resolvedParams.filename
     
     if (!filename) {
       return new NextResponse('Filename required', { status: 400 })
     }
 
-    const image = await getImage(filename)
+    // Try to get image by filename first, then by full URL
+    let image = await getImage(filename)
+    
+    // If not found by filename, try with full URL format
+    if (!image && !filename.startsWith('/api/images/')) {
+      image = await getImage(`/api/images/${filename}`)
+    }
     
     if (!image) {
+      console.error(`Image not found: ${filename}`)
       return new NextResponse('Image not found', { status: 404 })
     }
 
@@ -36,6 +45,10 @@ export async function GET(
     })
   } catch (error: any) {
     console.error('Image serve error:', error)
-    return new NextResponse('Error serving image', { status: 500 })
+    console.error('Error details:', {
+      message: error.message,
+      stack: error.stack,
+    })
+    return new NextResponse(`Error serving image: ${error.message}`, { status: 500 })
   }
 }

@@ -84,39 +84,64 @@ export async function getImage(urlOrFilename: string): Promise<ImageRecord | nul
     throw new Error('DATABASE_URL not configured')
   }
   
-  const result = await sql`
-    SELECT 
-      id,
-      filename,
-      original_name as "originalName",
-      mime_type as "mimeType",
-      encode(data, 'hex') as data_hex,
-      size,
-      url,
-      created_at as "createdAt",
-      updated_at as "updatedAt"
-    FROM images
-    WHERE url = ${urlOrFilename} OR filename = ${urlOrFilename}
-    LIMIT 1
-  `
-  
-  if (result.length === 0) return null
-  
-  const row = result[0]
-  // Convert hex string back to Buffer
-  const imageData = Buffer.from(row.data_hex, 'hex')
-  
-  return {
-    id: row.id,
-    filename: row.filename,
-    originalName: row.originalName,
-    mimeType: row.mimeType,
-    data: imageData,
-    size: row.size,
-    url: row.url,
-    createdAt: row.createdAt,
-    updatedAt: row.updatedAt,
-  } as ImageRecord
+  try {
+    // Extract filename from URL if it's a full URL
+    let searchFilename = urlOrFilename
+    let searchUrl = urlOrFilename
+    
+    if (urlOrFilename.startsWith('/api/images/')) {
+      searchFilename = urlOrFilename.replace('/api/images/', '')
+      searchUrl = urlOrFilename
+    }
+    
+    const result = await sql`
+      SELECT 
+        id,
+        filename,
+        original_name as "originalName",
+        mime_type as "mimeType",
+        encode(data, 'hex') as data_hex,
+        size,
+        url,
+        created_at as "createdAt",
+        updated_at as "updatedAt"
+      FROM images
+      WHERE url = ${searchUrl} OR filename = ${searchFilename}
+      LIMIT 1
+    `
+    
+    if (result.length === 0) {
+      console.log(`Image not found for: ${urlOrFilename} (searched as filename: ${searchFilename}, url: ${searchUrl})`)
+      return null
+    }
+    
+    const row = result[0]
+    
+    // Check if data_hex exists and is valid
+    if (!row.data_hex) {
+      console.error('Image data_hex is null or undefined')
+      return null
+    }
+    
+    // Convert hex string back to Buffer
+    const imageData = Buffer.from(row.data_hex, 'hex')
+    
+    return {
+      id: row.id,
+      filename: row.filename,
+      originalName: row.originalName,
+      mimeType: row.mimeType,
+      data: imageData,
+      size: row.size,
+      url: row.url,
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt,
+    } as ImageRecord
+  } catch (error: any) {
+    console.error('Error in getImage:', error)
+    console.error('Searching for:', urlOrFilename)
+    throw error
+  }
 }
 
 /**

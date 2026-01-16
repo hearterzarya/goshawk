@@ -48,41 +48,10 @@ export function OptimizedImage({
     )
   }
 
-  // For external URLs (Blob or other), use unoptimized
-  if (isExternal) {
-    if (fill) {
-      return (
-        <Image
-          src={normalizedSrc}
-          alt={alt}
-          fill
-          className={className}
-          priority={priority}
-          unoptimized
-          onError={() => setError(true)}
-          style={{ objectFit }}
-          {...props}
-        />
-      )
-    }
-    return (
-      <Image
-        src={normalizedSrc}
-        alt={alt}
-        width={width}
-        height={height}
-        className={className}
-        priority={priority}
-        sizes={sizes}
-        unoptimized
-        onError={() => setError(true)}
-        style={{ objectFit }}
-        {...props}
-      />
-    )
-  }
-
-  // For local paths, use optimized Next.js Image
+  // For database images (/api/images/), use unoptimized since they're served dynamically
+  // For external URLs, also use unoptimized
+  const useUnoptimized = isExternal || normalizedSrc.startsWith('/api/images/')
+  
   if (fill) {
     return (
       <Image
@@ -91,7 +60,11 @@ export function OptimizedImage({
         fill
         className={className}
         priority={priority}
-        onError={() => setError(true)}
+        unoptimized={useUnoptimized}
+        onError={() => {
+          console.error('Image load error:', normalizedSrc)
+          setError(true)
+        }}
         style={{ objectFit }}
         {...props}
       />
@@ -107,7 +80,11 @@ export function OptimizedImage({
       className={className}
       priority={priority}
       sizes={sizes}
-      onError={() => setError(true)}
+      unoptimized={useUnoptimized}
+      onError={() => {
+        console.error('Image load error:', normalizedSrc)
+        setError(true)
+      }}
       style={{ objectFit }}
       {...props}
     />
