@@ -96,7 +96,7 @@ export default function AboutPage() {
       {/* Hero Section with Background */}
       <section className="relative min-h-[70vh] flex items-center justify-center overflow-hidden bg-white pt-20">
         {/* Background Image or Gradient */}
-        {content.heroImage ? (
+        {content.heroImage && content.heroImage.trim() !== '' ? (
           <div className="absolute inset-0">
             <OptimizedImage
               src={content.heroImage}
@@ -165,7 +165,7 @@ export default function AboutPage() {
             <div className="grid md:grid-cols-2 gap-12 items-center">
               {/* Mission Image */}
               <div className="relative h-96 rounded-2xl overflow-hidden shadow-2xl">
-                {content.missionImage ? (
+                {content.missionImage && content.missionImage.trim() !== '' ? (
                   <OptimizedImage
                     src={content.missionImage}
                     alt="Our mission"
