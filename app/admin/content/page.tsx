@@ -7,7 +7,6 @@ import { ArrowLeft, FileText, Edit } from 'lucide-react'
 
 const contentPages = [
   { title: 'Home Page', description: 'Edit hero section and homepage content', href: '/admin/content/home' },
-  { title: 'About Page', description: 'Edit company information and mission', href: '/admin/content/about' },
   { title: 'Contact Page', description: 'Edit contact information and form', href: '/admin/content/contact' },
 ]
 
