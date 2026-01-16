@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { isSessionValid, type AdminSession } from '@/lib/auth'
-import { deleteImage } from '@/lib/imageStorage'
+import { deleteImage } from '@/lib/db/images'
 
 export const dynamic = 'force-dynamic'
 
@@ -28,7 +28,7 @@ export async function DELETE(request: Request) {
     }
 
     try {
-      // Delete using hybrid storage system
+      // Delete from database
       await deleteImage(url)
       return NextResponse.json({ success: true })
     } catch (error: any) {

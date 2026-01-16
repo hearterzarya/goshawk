@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { isSessionValid, type AdminSession } from '@/lib/auth'
-import { listImages } from '@/lib/imageStorage'
+import { listImages } from '@/lib/db/images'
 
 export const dynamic = 'force-dynamic'
 
@@ -20,8 +20,9 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // List images using hybrid storage system
-    const images = await listImages()
+    // List images from database
+    const imageList = await listImages()
+    const images = imageList.map(img => img.url)
 
     return NextResponse.json({ images })
   } catch (error: any) {

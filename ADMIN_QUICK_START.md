@@ -28,10 +28,10 @@ URL: `http://localhost:3000/admin/login`
 ### ✅ Images
 - Go to: `/admin/images`
 - Drag & drop or click to upload
-- Images saved to **Vercel Blob Storage** (cloud)
-- Copy the full image URL to use in content
+- Images saved to **Neon Database**
+- Copy the image URL to use in content (format: `/api/images/filename`)
 - Click X to delete images
-- Requires `BLOB_READ_WRITE_TOKEN` in `.env.local` (see `ENV_SETUP.md`)
+- All images are stored in the database
 
 ### ✅ Home Page Content
 - Go to: `/admin/content` → Click "Home Page"
@@ -42,7 +42,7 @@ URL: `http://localhost:3000/admin/login`
 ## Image Usage
 
 After uploading images:
-1. Copy the full image URL (e.g., `https://*.public.blob.vercel-storage.com/uploads/...`)
+1. Copy the image URL (e.g., `/api/images/1234567890-image.jpg`)
 2. Use in:
    - Hero background (Home content editor)
    - Service images
@@ -56,10 +56,10 @@ After uploading images:
 - Check that the page exists (some edit pages need items to exist first)
 
 **Can't see images?**
-- Make sure `BLOB_READ_WRITE_TOKEN` is set in `.env.local` (see `ENV_SETUP.md`)
+- Make sure `DATABASE_URL` is set in `.env.local`
 - Check browser console for errors
 - Verify image was uploaded successfully
-- Ensure you're using the full Vercel Blob URL (not local paths)
+- Ensure database is initialized (run `npm run db:init`)
 
 **Changes not showing?**
 - Refresh the page

@@ -118,6 +118,22 @@ async function initDatabase() {
     `
     console.log('  ✅ faqs table created')
     
+    // Images table
+    await sql`
+      CREATE TABLE IF NOT EXISTS images (
+        id SERIAL PRIMARY KEY,
+        filename VARCHAR(255) NOT NULL,
+        original_name VARCHAR(255) NOT NULL,
+        mime_type VARCHAR(100) NOT NULL,
+        data BYTEA NOT NULL,
+        size INTEGER NOT NULL,
+        url TEXT NOT NULL,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `
+    console.log('  ✅ images table created')
+    
     // Create indexes
     console.log('\n📊 Creating indexes...\n')
     
@@ -129,6 +145,12 @@ async function initDatabase() {
     
     await sql`CREATE INDEX IF NOT EXISTS idx_services_slug ON services(slug)`
     console.log('  ✅ idx_services_slug created')
+    
+    await sql`CREATE INDEX IF NOT EXISTS idx_images_filename ON images(filename)`
+    console.log('  ✅ idx_images_filename created')
+    
+    await sql`CREATE INDEX IF NOT EXISTS idx_images_url ON images(url)`
+    console.log('  ✅ idx_images_url created')
     
     console.log('\n✅ Database schema initialized successfully!')
     console.log('\n🎉 Your Neon database is ready to use!')

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { isSessionValid, type AdminSession } from '@/lib/auth'
-import { uploadImage } from '@/lib/imageStorage'
+import { uploadImage } from '@/lib/db/images'
 
 export const dynamic = 'force-dynamic'
 
@@ -43,10 +43,10 @@ export async function POST(request: Request) {
       )
     }
 
-    // Upload using hybrid storage system
+    // Upload to database
     const result = await uploadImage(file)
 
-    return NextResponse.json({ url: result.url, filename: result.filename })
+    return NextResponse.json({ url: result.url, filename: result.url.split('/').pop() || '' })
   } catch (error: any) {
     console.error('Upload error:', error)
     

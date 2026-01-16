@@ -9,79 +9,95 @@ Create a `.env.local` file in the root of your project with the following variab
 ADMIN_USERNAME=admin
 ADMIN_PASSWORD=admin123
 
-# Vercel Blob Storage Token (REQUIRED for image uploads)
-# Get this from: Vercel Dashboard → Your Project → Settings → Storage → Blob
-BLOB_READ_WRITE_TOKEN=your_blob_token_here
+# Neon Database (REQUIRED)
+# Get this from: https://console.neon.tech/ → Your Project → Connection String
+DATABASE_URL=postgresql://user:password@host/database?sslmode=require
 
 # Base URL (Optional - for local development)
 NEXT_PUBLIC_BASE_URL=http://localhost:3000
 ```
 
-## How to Get BLOB_READ_WRITE_TOKEN
+## How to Get DATABASE_URL
 
-### For Local Development:
-1. Go to [Vercel Dashboard](https://vercel.com/dashboard)
-2. Create a new project or select existing project
-3. Go to **Settings** → **Storage** → **Blob**
-4. Click **"Create Database"** (if not already created)
-5. Copy the `BLOB_READ_WRITE_TOKEN` from the environment variables section
-6. Add it to your `.env.local` file
+### Step 1: Create Neon Database
+1. Go to [Neon Console](https://console.neon.tech/)
+2. Sign up or log in
+3. Create a new project
+4. Copy your connection string
 
-### For Production (Vercel):
-1. Go to your Vercel project dashboard
-2. Navigate to **Settings** → **Environment Variables**
-3. Add `BLOB_READ_WRITE_TOKEN` (it may be auto-added when you enable Blob Storage)
-4. The token will be automatically available to your deployed app
+### Step 2: Initialize Database
+1. Add `DATABASE_URL` to your `.env.local` file
+2. Run the initialization script:
+   ```bash
+   npm run db:init
+   ```
+3. This will create all necessary tables
+
+### Step 3: Migrate Existing Data (Optional)
+If you have existing JSON data:
+```bash
+npm run migrate
+```
 
 ## Quick Setup Steps
 
 1. **Create `.env.local` file** in the project root:
    ```bash
-   touch .env.local
+   cp env.template .env.local
    ```
 
-2. **Add the variables** (copy the template above)
+2. **Add your Neon database connection string**:
+   - Get it from [Neon Console](https://console.neon.tech/)
+   - Add it to `.env.local` as `DATABASE_URL`
 
-3. **Get your Blob token** from Vercel (see instructions above)
+3. **Initialize the database**:
+   ```bash
+   npm run db:init
+   ```
 
-4. **Restart your dev server**:
+4. **Start your dev server**:
    ```bash
    npm run dev
    ```
 
 ## Troubleshooting
 
-### Images Not Showing
+### Database Connection Issues
 
-1. **Check if BLOB_READ_WRITE_TOKEN is set**:
+1. **Check if DATABASE_URL is set**:
    - Make sure `.env.local` exists
-   - Verify the token is correct
+   - Verify the connection string is correct
    - Restart the dev server after adding variables
+
+2. **Check connection string format**:
+   - Should start with `postgresql://`
+   - Should include `?sslmode=require`
+   - Example: `postgresql://user:password@host/database?sslmode=require`
+
+3. **Verify database is initialized**:
+   - Run `npm run db:init` to create tables
+   - Check Neon Console to see if tables exist
+
+### Images Not Working
+
+1. **Check database connection**:
+   - Make sure `DATABASE_URL` is set correctly
+   - Verify database is initialized (run `npm run db:init`)
 
 2. **Check browser console** for errors:
    - Open DevTools (F12)
-   - Check Console tab for image loading errors
+   - Check Console tab for errors
    - Check Network tab to see if image requests are failing
 
-3. **Verify Vercel Blob is enabled**:
-   - Go to Vercel Dashboard
-   - Check if Blob Storage is created
-   - Ensure the token has read/write permissions
-
-4. **Check image URLs**:
-   - Images from Vercel Blob should have URLs like: `https://*.public.blob.vercel-storage.com/...`
-   - Make sure `next.config.js` has the blob domain configured (already done)
-
-### Common Issues
-
-- **"Unauthorized" errors**: Check if `BLOB_READ_WRITE_TOKEN` is set correctly
-- **Images upload but don't display**: Check browser console for CORS or domain issues
-- **"Upload failed"**: Verify the token has write permissions
+3. **Verify images table exists**:
+   - Run `npm run db:init` if you haven't already
+   - Check Neon Console SQL editor to verify `images` table exists
 
 ## Security Notes
 
 ⚠️ **Never commit `.env.local` to Git!** It's already in `.gitignore`
 
 - Keep your `ADMIN_PASSWORD` secure
-- Don't share your `BLOB_READ_WRITE_TOKEN` publicly
+- Don't share your `DATABASE_URL` publicly
 - Use different credentials for production
+- The database connection string contains sensitive credentials

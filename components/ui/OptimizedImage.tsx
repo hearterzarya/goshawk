@@ -1,7 +1,7 @@
 'use client'
 
 import Image from 'next/image'
-import { normalizeImageUrl, isBlobUrl } from '@/lib/imageUtils'
+import { normalizeImageUrl, isExternalUrl } from '@/lib/imageUtils'
 import { useState } from 'react'
 
 interface OptimizedImageProps {
@@ -34,7 +34,7 @@ export function OptimizedImage({
 }: OptimizedImageProps) {
   const [error, setError] = useState(false)
   const normalizedSrc = normalizeImageUrl(src)
-  const isExternal = isBlobUrl(normalizedSrc) || normalizedSrc.startsWith('http')
+  const isExternal = isExternalUrl(normalizedSrc)
   
   // If image fails to load, show placeholder
   if (error) {

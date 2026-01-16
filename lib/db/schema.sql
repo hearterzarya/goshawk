@@ -79,7 +79,22 @@ CREATE TABLE IF NOT EXISTS faqs (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Images table - stores all uploaded images
+CREATE TABLE IF NOT EXISTS images (
+  id SERIAL PRIMARY KEY,
+  filename VARCHAR(255) NOT NULL,
+  original_name VARCHAR(255) NOT NULL,
+  mime_type VARCHAR(100) NOT NULL,
+  data BYTEA NOT NULL,
+  size INTEGER NOT NULL,
+  url TEXT NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Create indexes for better performance
 CREATE INDEX IF NOT EXISTS idx_testimonials_rating ON testimonials(rating);
 CREATE INDEX IF NOT EXISTS idx_faqs_category ON faqs(category);
 CREATE INDEX IF NOT EXISTS idx_services_slug ON services(slug);
+CREATE INDEX IF NOT EXISTS idx_images_filename ON images(filename);
+CREATE INDEX IF NOT EXISTS idx_images_url ON images(url);
